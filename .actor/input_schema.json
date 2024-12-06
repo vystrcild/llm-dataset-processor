@@ -1,0 +1,66 @@
+{
+    "title": "LLM Dataset Processor",
+    "description": "Processes a dataset by sending a specified field to an LLM API and appending the responses to a new dataset.",
+    "type": "object",
+    "schemaVersion": 1,
+    "required": [
+        "inputDatasetId",
+        "llmApiToken",
+        "prompt",
+        "model",
+        "temperature",
+        "maxTokens"
+    ],
+    "properties": {
+        "inputDatasetId": {
+            "type": "string",
+            "title": "Input Dataset ID",
+            "description": "The ID of the dataset to process.",
+            "resourceType": "dataset"
+        },
+        "model": {
+            "type": "string",
+            "title": "LLM Model",
+            "description": "The LLM model to use (e.g., gpt-4o-mini).",
+            "editor": "select",
+            "enumTitles": ["GPT-4o mini (Recommended)", "GPT-4o", "Claude 3.5 Haiku (Recommended)", "Claude 3.5 Sonnet", "Claude 3 Opus", "Gemini 1.5 Flash", "Gemini 1.5 Flash-8B (Recommended)" ,"Gemini 1.5 Pro"],
+            "enum": ["gpt-4o-mini", "gpt-4o", "claude-3-5-haiku-latest", "claude-3-5-sonnet-latest", "claude-3-opus-latest", "gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-1.5-pro"],
+            "default": "gpt-4o-mini"
+        },
+        "llmApiToken": {
+            "type": "string",
+            "title": "LLM API Token",
+            "editor": "textfield",
+            "description": "Your API token for the LLM service (e.g., OpenAI).",
+            "isSecret": true
+        },
+        "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "editor": "textarea",
+            "minLength": 1,
+            "description": "The prompt to send to the LLM API. You can include placeholders like {{field}} to insert data from the dataset."
+        },
+        "skipItemIfEmpty": {
+            "type": "boolean",
+            "title": "Skip item if one or more {{field}} are empty",
+            "description": "Items in the dataset will be skipped if one or more {{field}} are empty.",
+            "default": true
+        },
+        "temperature": {
+            
+            "type": "string",
+            "title": "Temperature",
+            "editor": "textfield",
+            "description": "Sampling temperature for the LLM API (controls randomness).",
+            "default": "0.1"
+        },
+        "maxTokens": {
+            "type": "integer",
+            "title": "Max Tokens",
+            "editor": "number",
+            "description": "Maximum number of tokens in the LLM API response.",
+            "default": 150
+        }
+    }
+}
