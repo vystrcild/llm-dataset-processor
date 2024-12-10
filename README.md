@@ -1,4 +1,4 @@
-LLM Dataset Processor is an [Apify Actor](https://docs.apify.com/platform/actors) that allows you to process **whole datasets with single LLM prompt**. It's useful if you need to enrich data, summarize content, extract specific information, or manipulate data in a structured way using AI.
+LLM Dataset Processor is an [Apify Actor](https://docs.apify.com/platform/actors) that allows you to process **whole dataset with single LLM prompt**. It's useful if you need to enrich data, summarize content, extract specific information, or manipulate data in a structured way using AI.
 
 Just choose specific dataset to process, select LLM, provide API token and craft your prompt template. You could output responses as single column or JSON-structured multi-column format.
 
@@ -21,7 +21,7 @@ Actor supports **models from multiple LLM providers** such as OpenAI, Anthropic,
 - 🔄 Automatic retries for failed requests
 - ✅ JSON validation for structured outputs
 
-## Examples of single column output
+## Single column output
 New dataset is created and output is stored in a single column named `llmresponse`.
 
 ### Sentiment Analysis
@@ -38,22 +38,22 @@ Summarize provided text. Include also url, title and keywords at the end.
 
 Text: {{text}} 
 URL: {{url}}
-Metadata: {{metadata.title}}
+Title: {{metadata.title}}
 Keywords: {{metadata.keywords}}
 ```
 
 ### Translation
 ```
 Translate this text to English:
-{{content.text}}
+{{text}}
 ```
 
-## Examples of multi-column output
+## Using multi-column output
 New dataset is created and output is stored in multiple columns. To use this feature, make sure your prompt contains the names and descriptions of the desired columns in output. 
 
-Note that column structure and names are created by LLM based on input prompt. We highly recommend to test your prompt first by enabling `Test Prompt Mode`. In case that output structure does not match your expectations, please adjust your prompt and be more specific (using JSON structure, for example).
+Note that column structure and names are created by LLM based on input prompt. We highly recommend to test your prompt first by enabling `Test Prompt Mode`. In case that output structure does not match your expectations, please adjust your prompt and be more specific (using JSON structure or better description of columns).
 
-JSON structure is created with the first call and then it's validated for each item. If validation fails 3 times, the item in dataset is skipped. If validation fails frequently, please adjust your prompt and be more specific (using JSON structure, for example).
+Column structure is created with the first call and then it's validated for each item. If validation fails 3 times, the item in dataset is skipped. If validation fails frequently, please adjust your prompt and be more specific (using JSON structure or better description of columns).
 
 ### Extract contact information
 ```
@@ -82,16 +82,16 @@ Read provided text and create these:
 ```
 
 ## Which model to choose & Pricing
-For cost-effective processing, we recommend to use GPT-4o-mini and Claude 3.5 Haiku. For higher quality results, we recommend to use GPT-4o and Claude 3.5 Sonnet.
+For cost-effective processing, we recommend to use `GPT-4o-mini` and `Claude 3.5 Haiku`. For higher quality results, we recommend to use `GPT-4o` and `Claude 3.5 Sonnet`.
 
 Be aware that costs could grow very quickly with larger datasets. We recommend to test your prompt first by enabling `Test Prompt Mode`.
 
-Be sure that you've got enough credits to cover the cost of your LLM provider.
+Be sure that you've got sufficient credits in you LLM provider account.
 
 
 ## Limitations
-- API rate limits is set to 500 requests per minute
+- API rate limits is set to 500 requests per minute.
 - Maximum token limits vary by model. Please check your LLM provider documentation for details.
-- JSON validation for multiple columns may require prompt adjustments
+- JSON validation for multiple columns may require prompt adjustments.
 
 
