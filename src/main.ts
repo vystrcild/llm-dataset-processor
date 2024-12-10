@@ -19,7 +19,6 @@ try {
     }
 
     const {
-        inputDatasetId,
         llmApiToken,
         prompt,
         model,
@@ -31,6 +30,8 @@ try {
         testPrompt = false,
         testItemsCount = 3,
     } = input;
+
+    const inputDatasetId = input?.inputDatasetId || input?.defaultDatasetId;
 
     if (!inputDatasetId) {
         throw new Error('No inputDatasetId provided.');
@@ -145,17 +146,39 @@ Important: Return only a strict JSON object with the requested fields as keys. N
                     temperatureNum,
                     maxTokens
                 );
-                // Try parsing as JSON:
-                JSON.parse(testResponse);
-                return true; // JSON parsed successfully
-            } catch (err) {
-                if (attempt < 3) {
-                    log.warning(`JSON validation attempt ${attempt} failed. Retrying...`);
-                    finalPrompt = `${finalPrompt}\n\nThe last response was not valid JSON. Please return valid JSON this time.`;
-                } else {
-                    log.error('JSON validation attempts exhausted. The prompt may not produce valid JSON.');
-                    return false;
+                
+                // First check if we got an empty response
+                if (!testResponse) {
+                    log.error('Empty response received from the API');
+                    throw new Error('Empty response received from the API');
                 }
+
+                // Try parsing as JSON:
+                try {
+                    JSON.parse(testResponse);
+                    return true; // JSON parsed successfully
+                } catch (jsonError) {
+                    if (attempt < 3) {
+                        log.warning(`JSON validation attempt ${attempt} failed. Retrying...`);
+                        log.debug('Response that failed JSON parsing:', { response: testResponse });
+                        finalPrompt = `${finalPrompt}\n\nThe last response was not valid JSON. Please return valid JSON this time.`;
+                    } else {
+                        log.error('JSON validation attempts exhausted. The prompt may not produce valid JSON.');
+                        log.debug('Final response that failed JSON parsing:', { response: testResponse });
+                        return false;
+                    }
+                }
+            } catch (apiError: any) {
+                // Log the full error for debugging
+                log.error('API call failed:', { 
+                    error: apiError.message,
+                    type: apiError.type,
+                    code: apiError.code,
+                    param: apiError.param
+                });
+                
+                // Rethrow API errors immediately instead of retrying
+                throw apiError;
             }
         }
         return false;

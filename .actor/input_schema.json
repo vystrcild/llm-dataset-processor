@@ -44,17 +44,17 @@
         },
         "multipleColumns": {
             "type": "boolean",
-            "title": "Multiple columns",
-            "description": "When enabled, instructs the LLM to return responses as JSON objects, creating multiple columns in the output dataset. The actor will validate JSON formatting and retry up to 3 times if parsing fails. If disabled, responses are stored in a single 'llm_response' column.",
+            "title": "Multiple columns in output",
+            "description": "When enabled, instructs the LLM to return responses as JSON objects, creating multiple columns in the output dataset. The columns need to be named and described in the prompt. If disabled, responses are stored in a single 'llm_response' column.",
             "default": false
             },
-
         "prompt": {
             "type": "string",
             "title": "Prompt",
             "editor": "textarea",
             "minLength": 1,
-            "description": "The prompt template to send to the LLM API. Use {{fieldName}} placeholders to insert values from the input dataset (e.g., 'Summarize this text: {{content}}'). For multiple columns output, ensure your prompt contains the names and descriptions of the desired columns in output. See README for more details."
+            "description": "The prompt template to send to the LLM API. Use {{fieldName}} placeholders to insert values from the input dataset (e.g., 'Summarize this text: {{content}}'). For multiple columns output, ensure your prompt contains the names and descriptions of the desired columns in output. See README for more details.",
+            "prefill": "Summarize this text: {{text}}"
         },
         "skipItemIfEmpty": {
             "type": "boolean",
@@ -73,7 +73,7 @@
             "type": "boolean",
             "title": "Test Prompt Mode (Recommended)",
             "description": "Test mode that processes only a limited number of items (defined by testItemsCount). Use this to validate your prompt and configuration before running on the full dataset. We highly recommend enabling this option first because of ambiguity of the LLM responses.",
-            "default": false
+            "default": true
         },
         "testItemsCount": {
             "type": "integer",

@@ -1,8 +1,8 @@
 {
 	"actorSpecification": 1,
-	"name": "LLMDatasetTest",
-	"title": "Project Cheerio Crawler Typescript",
-	"description": "Crawlee and Cheerio project in typescript.",
+	"name": "llm-dataset-processor",
+	"title": "LLM Dataset Processor",
+	"description": "Process or enrich datasets with LLM-generated content.",
 	"version": "0.0",
 	"meta": {
 		"templateId": "ts-crawlee-cheerio"

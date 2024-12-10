@@ -1,4 +1,4 @@
-# LLM Dataset Processor
+## Description
 
 Process your datasets with Large Language Models including GPT-4o, Claude, and Gemini. This Actor allows you to send dataset items through various LLM providers and collect the responses in a structured format.
 
@@ -49,23 +49,8 @@ key_points: (array of main points)
 Review: {{review_text}}
 ```
 
-
 ## Output
-
 The Actor creates a new dataset with the processed results. If `multipleColumns` is disabled, responses are stored in a single column. If enabled, responses are parsed as JSON and stored in multiple columns.
-
-Example output with `multipleColumns`:
-```json
-{
-    "sentiment": "positive",
-    "rating": 4,
-    "key_points": [
-        "Great product quality",
-        "Fast shipping",
-        "Minor packaging issues"
-    ]
-}
-```
 
 ## Limitations
 - API rate limits apply based on your LLM provider's restrictions

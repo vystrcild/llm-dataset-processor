@@ -1,5 +1,6 @@
 export interface Input {
     inputDatasetId: string;
+    defaultDatasetId: string;
     llmApiToken: string;
     prompt: string;
     model: string;
