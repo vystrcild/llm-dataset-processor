@@ -21,6 +21,14 @@ Actor supports **models from multiple LLM providers** such as OpenAI, Anthropic,
 - 🔄 Automatic retries for failed requests
 - ✅ JSON validation for structured outputs
 
+
+## Placeholders
+You can specify columns of input dataset in your prompt. For example, if you have a dataset with columns `title` and `content`, you can use placeholders like `{{title}}` and `{{content}}` to access their values in the prompt.
+
+Nested fields are also supported, e.g., `{{metadata.title}}` to access the title field within the `metadata` object.
+
+You could use multiple placeholders in a single prompt.
+
 ## Single column output
 New dataset is created and output is stored in a single column named `llmresponse`.
 
