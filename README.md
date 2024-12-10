@@ -13,10 +13,10 @@ Actor supports **models from multiple LLM providers** such as OpenAI, Anthropic,
 - Gemini 1.5 Pro
 
 ## Main features
-- 🤖 Support for **multiple LLM providers** (OpenAI, Anthropic, Google)
 - 📊 Process entire datasets with **customizable prompt with {{placeholders}}**
 - 🎯 **Multiple output formats** (single column or JSON-structured multi-column)
 - 🔌 Standalone Actor or as a **Actor-to-Actor integration**
+- 🤖 Support for **multiple LLM providers** (OpenAI, Anthropic, Google)
 - ⚡ Built-in rate limiting and error handling
 - 🔄 Automatic retries for failed requests
 - ✅ JSON validation for structured outputs
@@ -80,6 +80,9 @@ Read provided text and create these:
 
 {{text}}
 ```
+
+## Skip items if one or more {{field}} are empty
+In case that one or more fields are empty, prompt is still sent to LLM and could generate unintended response. To prevent this, you can enable this option.
 
 ## Which model to choose & Pricing
 For cost-effective processing, we recommend to use `GPT-4o-mini` and `Claude 3.5 Haiku`. For higher quality results, we recommend to use `GPT-4o` and `Claude 3.5 Sonnet`.
