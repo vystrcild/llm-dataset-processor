@@ -34,6 +34,14 @@
             "description": "Your API token for the LLM service (e.g., OpenAI).",
             "isSecret": true
         },
+        "temperature": {
+            
+            "type": "string",
+            "title": "Temperature",
+            "editor": "textfield",
+            "description": "Sampling temperature for the LLM API (controls randomness).",
+            "default": "0.1"
+        },
         "prompt": {
             "type": "string",
             "title": "Prompt",
@@ -46,14 +54,6 @@
             "title": "Skip item if one or more {{field}} are empty",
             "description": "Items in the dataset will be skipped if one or more {{field}} are empty.",
             "default": true
-        },
-        "temperature": {
-            
-            "type": "string",
-            "title": "Temperature",
-            "editor": "textfield",
-            "description": "Sampling temperature for the LLM API (controls randomness).",
-            "default": "0.1"
         },
         "maxTokens": {
             "type": "integer",
