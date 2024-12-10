@@ -1,71 +1,97 @@
-## Description
+LLM Dataset Processor is an [Apify Actor](https://docs.apify.com/platform/actors) that allows you to process **whole datasets with single LLM prompt**. It's useful if you need to enrich data, summarize content, extract specific information, or manipulate data in a structured way using AI.
 
-Process your datasets with Large Language Models including GPT-4o, Claude, and Gemini. This Actor allows you to send dataset items through various LLM providers and collect the responses in a structured format.
+Just choose specific dataset to process, select LLM, provide API token and craft your prompt template. You could output responses as single column or JSON-structured multi-column format.
 
-Useful for enriching your datasets with LLM-generated content, summarization, translation, sentiment analysis, and more.
+Actor supports **models from multiple LLM providers** such as OpenAI, Anthropic, and Google. Currently available models are:
+- GPT-4o-mini
+- GPT-4o
+- Claude 3.5 Haiku
+- Claude 3.5 Sonnet
+- Claude 3 Opus
+- Gemini 1.5 Flash
+- Gemini 1.5 Flash-8B
+- Gemini 1.5 Pro
 
-## Features
-
-- 🤖 Support for multiple LLM providers (OpenAI, Anthropic, Google)
-- 📊 Process entire datasets with customizable prompts
-- 🎯 Multiple output formats (single column or JSON-structured multi-column)
+## Main features
+- 🤖 Support for **multiple LLM providers** (OpenAI, Anthropic, Google)
+- 📊 Process entire datasets with **customizable prompt with {{placeholders}}**
+- 🎯 **Multiple output formats** (single column or JSON-structured multi-column)
+- 🔌 Standalone Actor or as a **Actor-to-Actor integration**
 - ⚡ Built-in rate limiting and error handling
 - 🔄 Automatic retries for failed requests
 - ✅ JSON validation for structured outputs
 
+## Examples of single column output
+New dataset is created and output is stored in a single column named `llmresponse`.
 
-
-## Usage
-
-1. **Prepare Your Dataset**
-   - Ensure your input dataset is available on the Apify platform
-   - Note down the Dataset ID
-
-2. **Configure the Actor**
-   - Set the required input parameters
-   - Choose your preferred LLM provider and model
-   - Configure the prompt template using placeholders (e.g., {{field_name}})
-
-3. **Run the Actor**
-   - The Actor will process each item in your dataset
-   - Results will be saved to a new dataset
-
-### Prompt Template Examples
-
-Single column output:
-
+### Sentiment Analysis
 ```
-Analyze the sentiment of the following text: {{text}}
+Decide if this Instagram post is positive or negative:
+{{content.text}}
+
+Don't explaing anything, just return words "positive" or "negative".
 ```
 
-Multiple column output (with multipleColumns enabled):
-
+### Summarization
 ```
-Analyze the following product review and return a JSON object with these fields:
+Summarize provided text. Include also url, title and keywords at the end.
 
-sentiment: (positive/negative/neutral)
-rating: (1-5)
-key_points: (array of main points)
-Review: {{review_text}}
+Text: {{text}} 
+URL: {{url}}
+Metadata: {{metadata.title}}
+Keywords: {{metadata.keywords}}
 ```
 
-## Output
-The Actor creates a new dataset with the processed results. If `multipleColumns` is disabled, responses are stored in a single column. If enabled, responses are parsed as JSON and stored in multiple columns.
+### Translation
+```
+Translate this text to English:
+{{content.text}}
+```
+
+## Examples of multi-column output
+New dataset is created and output is stored in multiple columns. To use this feature, make sure your prompt contains the names and descriptions of the desired columns in output. 
+
+Note that column structure and names are created by LLM based on input prompt. We highly recommend to test your prompt first by enabling `Test Prompt Mode`. In case that output structure does not match your expectations, please adjust your prompt and be more specific (using JSON structure, for example).
+
+JSON structure is created with the first call and then it's validated for each item. If validation fails 3 times, the item in dataset is skipped. If validation fails frequently, please adjust your prompt and be more specific (using JSON structure, for example).
+
+### Extract contact information
+```
+Extract contact information from provided text.
+
+Data should be parsed in this specific format:
+- name
+- email: If any otherwise put "null"
+- phone: If any otherwise put "null"
+- country_code: International country code
+- address: Full address
+
+Don't explaing anything, just return valid JSON for specified fields. 
+
+Here's input text: {{text}}
+```
+
+### Extract key points from article
+```
+Read provided text and create these:
+- summary: simple summary of the content in few sentences
+- key_points: key thoughts and points
+- conclusion: conclusion and action steps
+
+{{text}}
+```
+
+## Which model to choose & Pricing
+For cost-effective processing, we recommend to use GPT-4o-mini and Claude 3.5 Haiku. For higher quality results, we recommend to use GPT-4o and Claude 3.5 Sonnet.
+
+Be aware that costs could grow very quickly with larger datasets. We recommend to test your prompt first by enabling `Test Prompt Mode`.
+
+Be sure that you've got enough credits to cover the cost of your LLM provider.
+
 
 ## Limitations
-- API rate limits apply based on your LLM provider's restrictions
-- Maximum token limits vary by model
+- API rate limits is set to 500 requests per minute
+- Maximum token limits vary by model. Please check your LLM provider documentation for details.
 - JSON validation for multiple columns may require prompt adjustments
 
-## Cost Considerations
-Costs vary depending on the chosen LLM provider and model:
-- GPT-4o-mini and Claude 3.5 Haiku are recommended for cost-effective processing
-- GPT-4o and Claude 3 Opus offer higher quality at increased cost
-- Token usage is monitored and logged during processing
 
-## Tips for Best Results
-- Start with a small test dataset using testPrompt: true
-- Adjust temperature based on needed response consistency
-- Use structured prompts with clear instructions
-- Monitor token usage to optimize costs
-- Consider using cheaper models for initial testing

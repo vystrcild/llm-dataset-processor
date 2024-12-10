@@ -1,6 +1,6 @@
 {
     "title": "LLM Dataset Processor",
-    "description": "Processes a dataset by sending a specified fields in the prompt to an LLM API and appending the responses to a new dataset.",
+    "description": "Choose specific dataset to process, select LLM, provide API token and craft your prompt template. We recommend to test your prompt first by enabling `Test Prompt Mode`. ",
     "type": "object",
     "schemaVersion": 1,
     "required": [
@@ -20,12 +20,11 @@
         },
         "model": {
             "type": "string",
-            "title": "LLM Model",
-            "description": "The LLM model to use for processing. Each model has different capabilities and pricing. GPT-4o-mini and Claude 3.5 Haiku are recommended for cost-effective processing, while models like Claude 3 Opus or GPT-4o offer higher quality but at a higher cost.",
+            "title": "Large Language Model",
+            "description": "The LLM to use for processing. Each model has different capabilities and pricing. GPT-4o-mini and Claude 3.5 Haiku are recommended for cost-effective processing, while models like Claude 3 Opus or GPT-4o offer higher quality but at a higher cost.",
             "editor": "select",
             "enumTitles": ["GPT-4o mini (Recommended)", "GPT-4o", "Claude 3.5 Haiku (Recommended)", "Claude 3.5 Sonnet", "Claude 3 Opus", "Gemini 1.5 Flash", "Gemini 1.5 Flash-8B (Recommended)" ,"Gemini 1.5 Pro"],
-            "enum": ["gpt-4o-mini", "gpt-4o", "claude-3-5-haiku-latest", "claude-3-5-sonnet-latest", "claude-3-opus-latest", "gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-1.5-pro"],
-            "default": "gpt-4o-mini"
+            "enum": ["gpt-4o-mini", "gpt-4o", "claude-3-5-haiku-latest", "claude-3-5-sonnet-latest", "claude-3-opus-latest", "gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-1.5-pro"]
         },
         "llmApiToken": {
             "type": "string",
@@ -45,7 +44,7 @@
         "multipleColumns": {
             "type": "boolean",
             "title": "Multiple columns in output",
-            "description": "When enabled, instructs the LLM to return responses as JSON objects, creating multiple columns in the output dataset. The columns need to be named and described in the prompt. If disabled, responses are stored in a single 'llm_response' column.",
+            "description": "When enabled, instructs the LLM to return responses as JSON objects, creating multiple columns in the output dataset. The columns need to be named and described in the prompt. If disabled, responses are stored in a single `llmresponse` column.",
             "default": false
             },
         "prompt": {
@@ -53,7 +52,7 @@
             "title": "Prompt",
             "editor": "textarea",
             "minLength": 1,
-            "description": "The prompt template to send to the LLM API. Use {{fieldName}} placeholders to insert values from the input dataset (e.g., 'Summarize this text: {{content}}'). For multiple columns output, ensure your prompt contains the names and descriptions of the desired columns in output. See README for more details.",
+            "description": "The prompt template to send to the LLM API. \n\nUse `{{fieldName}}` placeholders to insert values from the input dataset (e.g., `Summarize this text: {{content.text}}`). For multiple columns output, ensure your prompt contains the names and descriptions of the desired columns in output.\n\n See README for more details.",
             "prefill": "Summarize this text: {{text}}"
         },
         "skipItemIfEmpty": {
@@ -71,14 +70,14 @@
         },
         "testPrompt": {
             "type": "boolean",
-            "title": "Test Prompt Mode (Recommended)",
-            "description": "Test mode that processes only a limited number of items (defined by testItemsCount). Use this to validate your prompt and configuration before running on the full dataset. We highly recommend enabling this option first because of ambiguity of the LLM responses.",
+            "title": "Test Prompt Mode",
+            "description": "Test mode that processes only a limited number of items (defined by `testItemsCount`). Use this to validate your prompt and configuration before running on the full dataset. We highly recommend enabling this option first to validate your prompt because of ambiguity of the LLM responses.",
             "default": true
         },
         "testItemsCount": {
             "type": "integer",
             "title": "Test Items Count",
-            "description": "Number of items to process when Test Prompt Mode is enabled.",
+            "description": "Number of items to process when `Test Prompt Mode` is enabled.",
             "default": 3,
             "minimum": 1
         }
