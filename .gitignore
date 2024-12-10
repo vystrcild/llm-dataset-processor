@@ -10,3 +10,4 @@ storage
 
 # Added by Apify CLI
 .venv
+.env

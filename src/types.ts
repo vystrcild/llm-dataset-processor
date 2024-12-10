@@ -6,7 +6,10 @@ export interface Input {
     temperature: string;
     maxTokens: number;
     skipItemIfEmpty?: boolean;
+    multipleColumns?: boolean;
     provider?: 'openai' | 'anthropic' | 'google';
+    testPrompt?: boolean;
+    testItemsCount?: number;
 }
 
 export interface OutputItem extends Record<string, any> {

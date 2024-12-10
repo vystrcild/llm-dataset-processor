@@ -26,7 +26,10 @@ try {
         temperature,
         maxTokens,
         skipItemIfEmpty,
+        multipleColumns = false,
         provider: explicitProvider,
+        testPrompt = false,
+        testItemsCount = 3,
     } = input;
 
     if (!inputDatasetId) {
@@ -38,6 +41,7 @@ try {
         datasetId: inputDatasetId,
         model: model,
         promptTemplate: prompt,
+        multipleColumns
     };
     log.info('Configuration details:', configDetails);
 
@@ -73,6 +77,19 @@ try {
         });
     }
 
+    // Build the final prompt:
+    // If multipleColumns is true, we instruct the LLM to return a strict JSON object.
+    function buildFinalPrompt(promptText: string): string {
+        if (!multipleColumns) {
+            return promptText;
+        }
+
+        // Append clear instructions to return JSON only
+        return `${promptText}
+
+Important: Return only a strict JSON object with the requested fields as keys. No extra text or explanations, no markdown, just JSON.`;
+    }
+
     // Fetch items from the input dataset
     let items: OutputItem[] = [];
     try {
@@ -85,7 +102,15 @@ try {
         const inputDataset = await Actor.openDataset<OutputItem>(inputDatasetId);
         const { items: fetchedItems } = await inputDataset.getData();
         items = fetchedItems;
-        log.info(`Fetched ${items.length} items from the input dataset.`);
+
+        // If test mode is enabled, limit the number of items
+        if (testPrompt) {
+            const itemCount = Math.min(testItemsCount, items.length);
+            items = items.slice(0, itemCount);
+            log.info(`Test mode enabled - processing ${itemCount} items out of ${fetchedItems.length}`);
+        } else {
+            log.info(`Fetched ${items.length} items from the input dataset.`);
+        }
     } catch (datasetError: unknown) {
         if (datasetError instanceof Error) {
             log.error(`Error accessing dataset: ${datasetError.message}`);
@@ -105,6 +130,44 @@ try {
     // Convert temperature from string to number
     const temperatureNum = parseFloat(temperature);
 
+    // If multipleColumns is true, we can do a validation step with a sample item.
+    async function validateJsonFormat(testItem: OutputItem): Promise<boolean> {
+        if (!multipleColumns) return true; // No need to validate if single column.
+
+        const provider = getProvider(model, explicitProvider);
+        let finalPrompt = replacePlaceholders(buildFinalPrompt(prompt), testItem);
+
+        for (let attempt = 1; attempt <= 3; attempt++) {
+            try {
+                const testResponse = await providers[provider].call(
+                    finalPrompt,
+                    model,
+                    temperatureNum,
+                    maxTokens
+                );
+                // Try parsing as JSON:
+                JSON.parse(testResponse);
+                return true; // JSON parsed successfully
+            } catch (err) {
+                if (attempt < 3) {
+                    log.warning(`JSON validation attempt ${attempt} failed. Retrying...`);
+                    finalPrompt = `${finalPrompt}\n\nThe last response was not valid JSON. Please return valid JSON this time.`;
+                } else {
+                    log.error('JSON validation attempts exhausted. The prompt may not produce valid JSON.');
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+    if (items.length > 0) {
+        const validationResult = await validateJsonFormat(items[0]);
+        if (multipleColumns && !validationResult) {
+            throw new Error('Failed to produce valid JSON after multiple attempts. Please adjust your prompt or disable multiple columns.');
+        }
+    }
+
     // Process each item
     for (let i = 0; i < items.length; i++) {
         const item = items[i];
@@ -117,25 +180,69 @@ try {
             }
 
             // Replace placeholders in the prompt
-            const promptText = replacePlaceholders(prompt, item);
-            log.info(`Processing item ${i + 1}/${items.length}`, { prompt: promptText });
+            let finalPrompt = replacePlaceholders(buildFinalPrompt(prompt), item);
+            log.info(`Processing item ${i + 1}/${items.length}`, { prompt: finalPrompt });
 
             // Determine the provider and make the API call
             const provider = getProvider(model, explicitProvider); // returns 'openai' | 'anthropic' | 'google'
-            const llmResponse = await providers[provider].call(
-                promptText,
+            let llmresponse = await providers[provider].call(
+                finalPrompt,
                 model,
                 temperatureNum,
                 maxTokens
             );
 
-            log.info(`Item ${i + 1} response:`, { response: llmResponse });
+            log.info(`Item ${i + 1} response:`, { response: llmresponse });
 
-            // Add the response to the item
-            item.LLMResponse = llmResponse;
+            if (multipleColumns) {
+                let parsedData: any;
+                let attemptsLeft = 2; // After initial call, try parsing or retrying up to 2 times more if needed
+                let currentResponse = llmresponse;
+                let success = false;
 
-            // Push the item to the default dataset
-            await Actor.pushData(item);
+                while (attemptsLeft >= 0) {
+                    try {
+                        parsedData = JSON.parse(currentResponse);
+                        success = true;
+                        break;
+                    } catch (err) {
+                        if (attemptsLeft > 0) {
+                            // Retry by asking again for correct JSON
+                            log.warning(`Failed to parse JSON for item ${i + 1}. Retrying...`);
+                            const retryPrompt = `${finalPrompt}\n\nThe last response was not valid JSON. Please return valid JSON this time.`;
+                            const retryResponse = await providers[provider].call(
+                                retryPrompt,
+                                model,
+                                temperatureNum,
+                                maxTokens
+                            );
+                            currentResponse = retryResponse;
+                            attemptsLeft--;
+                        } else {
+                            // No attempts left
+                            log.error(`Failed to parse JSON after multiple attempts for item ${i + 1}. Using raw response as single column.`);
+                            break;
+                        }
+                    }
+                }
+
+                if (success && typeof parsedData === 'object' && parsedData !== null) {
+                    // Push multiple columns
+                    const outputItem: Record<string, unknown> = { ...item };
+                    for (const key of Object.keys(parsedData)) {
+                        outputItem[key] = parsedData[key];
+                    }
+                    await Actor.pushData(outputItem);
+                } else {
+                    // Fallback to single column mode if JSON parsing failed
+                    const fallbackItem = { ...item, llmresponse: currentResponse };
+                    await Actor.pushData(fallbackItem);
+                }
+            } else {
+                // Single column mode: Just push the response
+                item.llmresponse = llmresponse;
+                await Actor.pushData(item);
+            }
 
             // Respect rate limits
             await new Promise(resolve => setTimeout(resolve, REQUEST_INTERVAL_MS));

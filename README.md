@@ -1,74 +1,86 @@
-## TypeScript Crawlee & CheerioCrawler template
+# LLM Dataset Processor
 
-A template example built with [Crawlee](https://crawlee.dev/) to scrape data from a website using [Cheerio](https://cheerio.js.org/) wrapped into [CheerioCrawler](https://crawlee.dev/api/cheerio-crawler/class/CheerioCrawler).
+Process your datasets with Large Language Models including GPT-4o, Claude, and Gemini. This Actor allows you to send dataset items through various LLM providers and collect the responses in a structured format.
 
-## Included features
+Useful for enriching your datasets with LLM-generated content, summarization, translation, sentiment analysis, and more.
 
-- **[Apify SDK](https://docs.apify.com/sdk/js)** - toolkit for building [Actors](https://apify.com/actors)
-- **[Crawlee](https://crawlee.dev/)** - web scraping and browser automation library
-- **[Input schema](https://docs.apify.com/platform/actors/development/input-schema)** - define and easily validate a schema for your Actor's input
-- **[Dataset](https://docs.apify.com/sdk/python/docs/concepts/storages#working-with-datasets)** - store structured data where each object stored has the same attributes
-- **[Cheerio](https://cheerio.js.org/)** - a fast, flexible & elegant library for parsing and manipulating HTML and XML
+## Features
 
-## How it works
-
-This code is a TypeScript script that uses [Crawlee CheerioCrawler](https://crawlee.dev/api/cheerio-crawler/class/CheerioCrawler) framework to crawl a website and extract the data from the crawled URLs with Cheerio. It then stores the website titles in a dataset.
-
-- The crawler starts with URLs provided from the input `startUrls` field defined by the input schema. Number of scraped pages is limited by `maxPagesPerCrawl` field from input schema.
-- The crawler uses `requestHandler` for each URL to extract the data from the page with the Cheerio library and to save the title and URL of each page to the dataset. It also logs out each result that is being saved.
-
-## Resources
-
-- [Video tutorial](https://www.youtube.com/watch?v=yTRHomGg9uQ) on building a scraper using CheerioCrawler
-- [Written tutorial](https://docs.apify.com/academy/web-scraping-for-beginners/challenge) on building a scraper using CheerioCrawler
-- [Web scraping with Cheerio in 2023](https://blog.apify.com/web-scraping-with-cheerio/)
-- How to [scrape a dynamic page](https://blog.apify.com/what-is-a-dynamic-page/) using Cheerio
-- [TypeScript vs. JavaScript: which to use for web scraping?](https://blog.apify.com/typescript-vs-javascript-crawler/)
-- [Integration with Zapier](https://apify.com/integrations), Make, Google Drive and others
-- [Video guide on getting scraped data using Apify API](https://www.youtube.com/watch?v=ViYYDHSBAKM)
-- A short guide on how to build web scrapers using code templates:
-
-[web scraper template](https://www.youtube.com/watch?v=u-i-Korzf8w)
+- 🤖 Support for multiple LLM providers (OpenAI, Anthropic, Google)
+- 📊 Process entire datasets with customizable prompts
+- 🎯 Multiple output formats (single column or JSON-structured multi-column)
+- ⚡ Built-in rate limiting and error handling
+- 🔄 Automatic retries for failed requests
+- ✅ JSON validation for structured outputs
 
 
-## Getting started
 
-For complete information [see this article](https://docs.apify.com/platform/actors/development#build-actor-locally). To run the actor use the following command:
+## Usage
 
-```bash
-apify run
+1. **Prepare Your Dataset**
+   - Ensure your input dataset is available on the Apify platform
+   - Note down the Dataset ID
+
+2. **Configure the Actor**
+   - Set the required input parameters
+   - Choose your preferred LLM provider and model
+   - Configure the prompt template using placeholders (e.g., {{field_name}})
+
+3. **Run the Actor**
+   - The Actor will process each item in your dataset
+   - Results will be saved to a new dataset
+
+### Prompt Template Examples
+
+Single column output:
+
+```
+Analyze the sentiment of the following text: {{text}}
 ```
 
-## Deploy to Apify
+Multiple column output (with multipleColumns enabled):
 
-### Connect Git repository to Apify
+```
+Analyze the following product review and return a JSON object with these fields:
 
-If you've created a Git repository for the project, you can easily connect to Apify:
+sentiment: (positive/negative/neutral)
+rating: (1-5)
+key_points: (array of main points)
+Review: {{review_text}}
+```
 
-1. Go to [Actor creation page](https://console.apify.com/actors/new)
-2. Click on **Link Git Repository** button
 
-### Push project on your local machine to Apify
+## Output
 
-You can also deploy the project on your local machine to Apify without the need for the Git repository.
+The Actor creates a new dataset with the processed results. If `multipleColumns` is disabled, responses are stored in a single column. If enabled, responses are parsed as JSON and stored in multiple columns.
 
-1. Log in to Apify. You will need to provide your [Apify API Token](https://console.apify.com/account/integrations) to complete this action.
+Example output with `multipleColumns`:
+```json
+{
+    "sentiment": "positive",
+    "rating": 4,
+    "key_points": [
+        "Great product quality",
+        "Fast shipping",
+        "Minor packaging issues"
+    ]
+}
+```
 
-    ```bash
-    apify login
-    ```
+## Limitations
+- API rate limits apply based on your LLM provider's restrictions
+- Maximum token limits vary by model
+- JSON validation for multiple columns may require prompt adjustments
 
-2. Deploy your Actor. This command will deploy and build the Actor on the Apify Platform. You can find your newly created Actor under [Actors -> My Actors](https://console.apify.com/actors?tab=my).
+## Cost Considerations
+Costs vary depending on the chosen LLM provider and model:
+- GPT-4o-mini and Claude 3.5 Haiku are recommended for cost-effective processing
+- GPT-4o and Claude 3 Opus offer higher quality at increased cost
+- Token usage is monitored and logged during processing
 
-    ```bash
-    apify push
-    ```
-
-## Documentation reference
-
-To learn more about Apify and Actors, take a look at the following resources:
-
-- [Apify SDK for JavaScript documentation](https://docs.apify.com/sdk/js)
-- [Apify SDK for Python documentation](https://docs.apify.com/sdk/python)
-- [Apify Platform documentation](https://docs.apify.com/platform)
-- [Join our developer community on Discord](https://discord.com/invite/jyEM2PRvMU)
+## Tips for Best Results
+- Start with a small test dataset using testPrompt: true
+- Adjust temperature based on needed response consistency
+- Use structured prompts with clear instructions
+- Monitor token usage to optimize costs
+- Consider using cheaper models for initial testing
