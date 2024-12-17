@@ -1,8 +1,8 @@
-LLM Dataset Processor is an [Apify Actor](https://docs.apify.com/platform/actors) that allows you to process **whole dataset with single LLM prompt**. It's useful if you need to enrich data, summarize content, extract specific information, or manipulate data in a structured way using AI.
+LLM Dataset Processor is an [Apify Actor](https://docs.apify.com/platform/actors) that allows you to process a **whole dataset with a single LLM prompt**. It's useful when you need to enrich data, summarize content, extract specific information, or manipulate data in a structured way using AI.
 
-Just choose specific dataset to process, select LLM, provide API token and craft your prompt template. You could output responses as single column or JSON-structured multi-column format.
+Choose a specific dataset to process, select an LLM, provide an API token, and craft your prompt template. You can output responses as a single column or in a JSON-structured multi-column format.
 
-Actor supports **models from multiple LLM providers** such as OpenAI, Anthropic, and Google. Currently available models are:
+The Actor supports **models from multiple LLM providers** such as OpenAI, Anthropic, and Google. Currently available models are:
 - GPT-4o-mini
 - GPT-4o
 - Claude 3.5 Haiku
@@ -21,15 +21,14 @@ Actor supports **models from multiple LLM providers** such as OpenAI, Anthropic,
 - 🔄 Automatic retries for failed requests
 - ✅ JSON validation for structured outputs
 
-
 ## Placeholders
-You can specify columns of input dataset in your prompt. For example, if you have a dataset with columns `title` and `content`, you can use placeholders like `{{title}}` and `{{content}}` to access their values in the prompt.
+You can specify columns of the input dataset in your prompt. For example, if you have a dataset with columns `title` and `content`, you can use placeholders like `{{title}}` and `{{content}}` to access their values in the prompt.
 
 Nested fields are also supported, e.g., `{{metadata.title}}` to access the title field within the `metadata` object.
 
-You could use multiple placeholders in a single prompt.
+You can use multiple placeholders in a single prompt.
 
-Placeholders are replaced with exact values from the input dataset for each item in the dataset, so be careful with crafting your prompt.
+Placeholders are replaced with exact values from the input dataset for each item, so be careful when crafting your prompt.
 
 ❌ **Bad practice:**
 ```
@@ -52,14 +51,14 @@ Here's the post: Congratulations to your victory!!! 🥳
 ```
 
 ## Single column output
-New dataset is created and output is stored in a single column named `llmresponse`.
+A new dataset is created and the output is stored in a single column named `llmresponse`.
 
 ### Sentiment Analysis
 ```
 Decide if this Instagram post is positive or negative:
 {{content.text}}
 
-Don't explaing anything, just return words "positive" or "negative".
+Don't explain anything, just return words "positive" or "negative".
 ```
 
 ### Summarization
@@ -79,11 +78,11 @@ Translate this text to English:
 ```
 
 ## Using multi-column output
-New dataset is created and output is stored in multiple columns. To use this feature, make sure your prompt contains the names and descriptions of the desired columns in output. 
+A new dataset is created and the output is stored in multiple columns. To use this feature, make sure your prompt contains the names and descriptions of the desired output columns.
 
-Note that column structure and names are created by LLM based on input prompt. We highly recommend to test your prompt first by enabling `Test Prompt Mode`. In case that output structure does not match your expectations, please adjust your prompt and be more specific (using JSON structure or better description of columns).
+Note that the column structure and names are created by the LLM based on the input prompt. We highly recommend testing your prompt first by enabling `Test Prompt Mode`. If the output structure does not match your expectations, please adjust your prompt to be more specific (using JSON structure or better column descriptions).
 
-Column structure is created with the first call and then it's validated for each item. If validation fails 3 times, the item in dataset is skipped. If validation fails frequently, please adjust your prompt and be more specific (using JSON structure or better description of columns).
+The column structure is created with the first call and then validated for each item. If validation fails 3 times, the item in the dataset is skipped. If validation fails frequently, please adjust your prompt to be more specific.
 
 ### Extract contact information
 ```
@@ -96,7 +95,7 @@ Data should be parsed in this specific format:
 - country_code: International country code
 - address: Full address
 
-Don't explaing anything, just return valid JSON for specified fields. 
+Don't explain anything, just return valid JSON for specified fields. 
 
 Here's input text: {{text}}
 ```
@@ -112,19 +111,16 @@ Read provided text and create these:
 ```
 
 ## Skip items if one or more {{fields}} are empty
-In case that one or more fields are empty, prompt is still sent to LLM and could generate unintended response. To prevent this, you should keep this option enabled.
+If one or more fields are empty, the prompt is still sent to the LLM and could generate an unintended response. To prevent this, you should keep this option enabled.
 
 ## Which model to choose?
-For cost-effective processing, we recommend to use `GPT-4o-mini` and `Claude 3.5 Haiku`. For higher quality results, we recommend to use `GPT-4o` and `Claude 3.5 Sonnet`.
+For cost-effective processing, we recommend using `GPT-4o-mini` and `Claude 3.5 Haiku`. For higher quality results, we recommend using `GPT-4o` and `Claude 3.5 Sonnet`.
 
-Be aware that costs could grow very quickly with larger datasets. We recommend to test your prompt first by enabling `Test Prompt Mode`.
+Be aware that costs can grow very quickly with larger datasets. We recommend testing your prompt first by enabling `Test Prompt Mode`.
 
-Be sure that you've got sufficient credits in you LLM provider account.
-
+Make sure you have sufficient credits in your LLM provider account.
 
 ## Limitations
-- API rate limits is set to 500 requests per minute.
-- Maximum token limits vary by model. Please check your LLM provider documentation for details.
+- The API rate limit is set to 500 requests per minute.
+- Maximum token limits vary by model. Please check your LLM provider's documentation for details.
 - JSON validation for multiple columns may require prompt adjustments.
-
-
