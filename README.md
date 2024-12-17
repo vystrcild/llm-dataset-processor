@@ -29,6 +29,28 @@ Nested fields are also supported, e.g., `{{metadata.title}}` to access the title
 
 You could use multiple placeholders in a single prompt.
 
+Placeholders are replaced with exact values from the input dataset for each item in the dataset, so be careful with crafting your prompt.
+
+❌ **Bad practice:**
+```
+Take a look at all the values of the {{text}} field in the dataset and do a sentiment analysis - write  \"positive\" \"negative\" or \"neutral\"
+```
+will resolve to:
+```
+Take a look at all the values of the Congratulations to your victory!!! 🥳 field in the dataset and do a sentiment analysis - write  "positive" "negative" or "neutral"
+```
+
+✅ **Good practice:**
+```
+Evaluate this post and label it as "positive", "negative" or "neutral". Don't explain anything and don't add any unnecessary text, generate only the label. 
+Here's the post: {{text}}
+```
+will resolve to:
+```
+Evaluate this post and label it as "positive", "negative" or "neutral". Don't explain anything and don't add any unnecessary text, generate only the label. 
+Here's the post: Congratulations to your victory!!! 🥳
+```
+
 ## Single column output
 New dataset is created and output is stored in a single column named `llmresponse`.
 
@@ -89,10 +111,10 @@ Read provided text and create these:
 {{text}}
 ```
 
-## Skip items if one or more {{field}} are empty
-In case that one or more fields are empty, prompt is still sent to LLM and could generate unintended response. To prevent this, you can enable this option.
+## Skip items if one or more {{fields}} are empty
+In case that one or more fields are empty, prompt is still sent to LLM and could generate unintended response. To prevent this, you should keep this option enabled.
 
-## Which model to choose & Pricing
+## Which model to choose?
 For cost-effective processing, we recommend to use `GPT-4o-mini` and `Claude 3.5 Haiku`. For higher quality results, we recommend to use `GPT-4o` and `Claude 3.5 Sonnet`.
 
 Be aware that costs could grow very quickly with larger datasets. We recommend to test your prompt first by enabling `Test Prompt Mode`.

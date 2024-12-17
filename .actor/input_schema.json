@@ -57,7 +57,7 @@
         },
         "skipItemIfEmpty": {
             "type": "boolean",
-            "title": "Skip item if one or more {{field}} are empty",
+            "title": "Skip item if one or more {{fields}} are empty",
             "description": "When enabled, items will be skipped if any {{field}} referenced in the prompt is empty, null, undefined, or contains only whitespace. This helps prevent processing incomplete data.",
             "default": true
         },
