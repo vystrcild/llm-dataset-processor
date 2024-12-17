@@ -31,7 +31,7 @@ try {
         testItemsCount = 3,
     } = input;
 
-    const inputDatasetId = input?.inputDatasetId || input?.defaultDatasetId;
+    const inputDatasetId = input?.inputDatasetId || input?.payload?.resource?.defaultDatasetId;
 
     if (!inputDatasetId) {
         throw new Error('No inputDatasetId provided.');
@@ -101,9 +101,11 @@ Important: Return only a strict JSON object with the requested fields as keys. N
         }
 
         const inputDataset = await Actor.openDataset<OutputItem>(inputDatasetId);
+        console.log(inputDataset);
         const { items: fetchedItems } = await inputDataset.getData();
         items = fetchedItems;
-
+        console.log(items);
+        
         // If test mode is enabled, limit the number of items
         if (testPrompt) {
             const itemCount = Math.min(testItemsCount, items.length);

@@ -11,6 +11,15 @@ export interface Input {
     provider?: 'openai' | 'anthropic' | 'google';
     testPrompt?: boolean;
     testItemsCount?: number;
+    payload: Payload | null;
+}
+
+export interface Payload {
+    resource: Resource;
+}
+
+export interface Resource {
+    defaultDatasetId: string;
 }
 
 export interface OutputItem extends Record<string, any> {
