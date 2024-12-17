@@ -4,7 +4,6 @@
     "type": "object",
     "schemaVersion": 1,
     "required": [
-        "inputDatasetId",
         "llmApiToken",
         "prompt",
         "model",
