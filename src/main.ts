@@ -62,9 +62,9 @@ try {
 
     // Helper function to check if any placeholder field is empty
     function hasEmptyFields(promptStr: string, item: OutputItem): boolean {
-        const fieldMatches = promptStr.match(/\{\{([^}]+)\}\}/g) || [];
+        const fieldMatches = promptStr.match(/\$\{([^}]+)\}/g) || [];
         return fieldMatches.some(match => {
-            const field = match.slice(2, -2).trim(); // Remove {{ and }}
+            const field = match.slice(2, -1).trim(); // Remove ${ and }
             const value = getNestedValue(item, field);
             return isEmpty(value);
         });
@@ -72,7 +72,7 @@ try {
 
     // Helper function to replace field placeholders in prompt with actual values
     function replacePlaceholders(promptStr: string, item: OutputItem): string {
-        return promptStr.replace(/\{\{([^}]+)\}\}/g, (_match, fieldName: string) => {
+        return promptStr.replace(/\$\{([^}]+)\}/g, (_match, fieldName: string) => {
             const value = getNestedValue(item, fieldName.trim());
             return value !== undefined ? String(value) : '';
         });

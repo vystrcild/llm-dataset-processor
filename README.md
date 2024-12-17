@@ -13,7 +13,7 @@ The Actor supports **models from multiple LLM providers** such as OpenAI, Anthro
 - Gemini 1.5 Pro
 
 ## Main features
-- 📊 Process entire datasets with **customizable prompt with {{placeholders}}**
+- 📊 Process entire datasets with **customizable prompt with ${placeholders}**
 - 🎯 **Multiple output formats** (single column or JSON-structured multi-column)
 - 🔌 Standalone Actor or as a **Actor-to-Actor integration**
 - 🤖 Support for **multiple LLM providers** (OpenAI, Anthropic, Google)
@@ -22,9 +22,9 @@ The Actor supports **models from multiple LLM providers** such as OpenAI, Anthro
 - ✅ JSON validation for structured outputs
 
 ## Placeholders
-You can specify columns of the input dataset in your prompt. For example, if you have a dataset with columns `title` and `content`, you can use placeholders like `{{title}}` and `{{content}}` to access their values in the prompt.
+You can specify columns of the input dataset in your prompt. For example, if you have a dataset with columns `title` and `content`, you can use placeholders like ${title} and ${content} to access their values in the prompt.
 
-Nested fields are also supported, e.g., `{{metadata.title}}` to access the title field within the `metadata` object.
+Nested fields are also supported, e.g., ${metadata.title} to access the title field within the `metadata` object.
 
 You can use multiple placeholders in a single prompt.
 
@@ -32,7 +32,7 @@ Placeholders are replaced with exact values from the input dataset for each item
 
 ❌ **Bad practice:**
 ```
-Take a look at all the values of the {{text}} field in the dataset and do a sentiment analysis - write  \"positive\" \"negative\" or \"neutral\"
+Take a look at all the values of the ${text} field in the dataset and do a sentiment analysis - write  \"positive\" \"negative\" or \"neutral\"
 ```
 will resolve to:
 ```
@@ -42,7 +42,7 @@ Take a look at all the values of the Congratulations to your victory!!! 🥳 fie
 ✅ **Good practice:**
 ```
 Evaluate this post and label it as "positive", "negative" or "neutral". Don't explain anything and don't add any unnecessary text, generate only the label. 
-Here's the post: {{text}}
+Here's the post: ${text}
 ```
 will resolve to:
 ```
@@ -56,7 +56,7 @@ A new dataset is created and the output is stored in a single column named `llmr
 ### Sentiment Analysis
 ```
 Decide if this Instagram post is positive or negative:
-{{content.text}}
+${content.text}
 
 Don't explain anything, just return words "positive" or "negative".
 ```
@@ -65,16 +65,16 @@ Don't explain anything, just return words "positive" or "negative".
 ```
 Summarize provided text. Include also url, title and keywords at the end.
 
-Text: {{text}} 
-URL: {{url}}
-Title: {{metadata.title}}
-Keywords: {{metadata.keywords}}
+Text: ${text} 
+URL: ${url}
+Title: ${metadata.title}
+Keywords: ${metadata.keywords}
 ```
 
 ### Translation
 ```
 Translate this text to English:
-{{text}}
+${text}
 ```
 
 ## Using multi-column output
@@ -97,7 +97,7 @@ Data should be parsed in this specific format:
 
 Don't explain anything, just return valid JSON for specified fields. 
 
-Here's input text: {{text}}
+Here's input text: ${text}
 ```
 
 ### Extract key points from article
@@ -107,10 +107,10 @@ Read provided text and create these:
 - key_points: key thoughts and points
 - conclusion: conclusion and action steps
 
-{{text}}
+${text}
 ```
 
-## Skip items if one or more {{fields}} are empty
+## Skip items if one or more ${fields} are empty
 If one or more fields are empty, the prompt is still sent to the LLM and could generate an unintended response. To prevent this, you should keep this option enabled.
 
 ## Which model to choose?
@@ -119,6 +119,12 @@ For cost-effective processing, we recommend using `GPT-4o-mini` and `Claude 3.5 
 Be aware that costs can grow very quickly with larger datasets. We recommend testing your prompt first by enabling `Test Prompt Mode`.
 
 Make sure you have sufficient credits in your LLM provider account.
+
+
+## Actor-to-Actor integration
+You can use LLM Dataset Processor as an Actor-to-Actor integration. This allows you to process a datasets from other Actors.
+
+Create task in **Saved tasks** and choose LLM Dataset Processor as Integration. In configuration, keep the **Input dataset ID** empty since it will be provided by the previous Actor.
 
 ## Limitations
 - The API rate limit is set to 500 requests per minute.

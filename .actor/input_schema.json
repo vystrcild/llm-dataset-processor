@@ -48,16 +48,16 @@
             },
         "prompt": {
             "type": "string",
-            "title": "Prompt",
+            "title": "Prompt Template",
+            "description": "The prompt template to use for processing. You can use ${fieldName} placeholders to reference fields from the input dataset.",
             "editor": "textarea",
             "minLength": 1,
-            "description": "The prompt template to send to the LLM API. \n\nUse `{{fieldName}}` placeholders to insert values from the input dataset (e.g., `Summarize this text: {{content.text}}`). For multiple columns output, ensure your prompt contains the names and descriptions of the desired columns in output.\n\n See README for more details.",
-            "prefill": "Summarize this text: {{text}}"
+            "prefill": "Summarize this text: ${text}"
         },
         "skipItemIfEmpty": {
             "type": "boolean",
-            "title": "Skip item if one or more {{fields}} are empty",
-            "description": "When enabled, items will be skipped if any {{field}} referenced in the prompt is empty, null, undefined, or contains only whitespace. This helps prevent processing incomplete data.",
+            "title": "Skip item if one or more ${fields} are empty",
+            "description": "When enabled, items will be skipped if any ${field} referenced in the prompt is empty, null, undefined, or contains only whitespace. This helps prevent processing incomplete data.",
             "default": true
         },
         "maxTokens": {
