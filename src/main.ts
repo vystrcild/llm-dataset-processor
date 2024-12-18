@@ -101,10 +101,8 @@ Important: Return only a strict JSON object with the requested fields as keys. N
         }
 
         const inputDataset = await Actor.openDataset<OutputItem>(inputDatasetId);
-        console.log(inputDataset);
         const { items: fetchedItems } = await inputDataset.getData();
         items = fetchedItems;
-        console.log(items);
         
         // If test mode is enabled, limit the number of items
         if (testPrompt) {
