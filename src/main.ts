@@ -10,11 +10,14 @@ const REQUEST_INTERVAL_MS = Math.ceil(60000 / RATE_LIMIT_PER_MINUTE); // Interva
 
 await Actor.init();
 
+// TODO use better structure, create a main function with a loop for each item.
+
 try {
     // Get the input
     const input: Input | null = await Actor.getInput();
 
     if (!input) {
+        // TODO use Actor.fail() instead of throw
         throw new Error('No input provided. Please provide the necessary input parameters.');
     }
 
@@ -26,7 +29,7 @@ try {
         maxTokens,
         skipItemIfEmpty,
         multipleColumns = false,
-        provider: explicitProvider,
+        provider: explicitProvider, // TODO: Explicit provider is not in the input schema, why to have it here?
         testPrompt = false,
         testItemsCount = 3,
     } = input;
@@ -34,15 +37,16 @@ try {
     const inputDatasetId = input?.inputDatasetId || input?.payload?.resource?.defaultDatasetId;
 
     if (!inputDatasetId) {
-        throw new Error('No inputDatasetId provided.');
+        // TODO: Provide more descriptive error message
+        await Actor.fail('No inputDatasetId provided.');
     }
 
     // Log configuration details
     const configDetails = {
         datasetId: inputDatasetId,
-        model: model,
+        model,
         promptTemplate: prompt,
-        multipleColumns
+        multipleColumns,
     };
     log.info('Configuration details:', configDetails);
 
@@ -93,6 +97,7 @@ Important: Return only a strict JSON object with the requested fields as keys. N
 
     // Fetch items from the input dataset
     let items: OutputItem[] = [];
+    // TODO Do not use looong try-catch block
     try {
         // First check if dataset exists
         const dataset = await Actor.apifyClient.dataset(inputDatasetId).get();
@@ -103,7 +108,7 @@ Important: Return only a strict JSON object with the requested fields as keys. N
         const inputDataset = await Actor.openDataset<OutputItem>(inputDatasetId);
         const { items: fetchedItems } = await inputDataset.getData();
         items = fetchedItems;
-        
+
         // If test mode is enabled, limit the number of items
         if (testPrompt) {
             const itemCount = Math.min(testItemsCount, items.length);
@@ -118,6 +123,7 @@ Important: Return only a strict JSON object with the requested fields as keys. N
         } else {
             log.error('Error accessing dataset: Unknown error occurred');
         }
+        // TODO use Actor.fail() instead of throw
         throw datasetError;
     }
 
@@ -144,9 +150,9 @@ Important: Return only a strict JSON object with the requested fields as keys. N
                     finalPrompt,
                     model,
                     temperatureNum,
-                    maxTokens
+                    maxTokens,
                 );
-                
+
                 // First check if we got an empty response
                 if (!testResponse) {
                     log.error('Empty response received from the API');
@@ -170,13 +176,13 @@ Important: Return only a strict JSON object with the requested fields as keys. N
                 }
             } catch (apiError: any) {
                 // Log the full error for debugging
-                log.error('API call failed:', { 
+                log.error('API call failed:', {
                     error: apiError.message,
                     type: apiError.type,
                     code: apiError.code,
                     param: apiError.param
                 });
-                
+
                 // Rethrow API errors immediately instead of retrying
                 throw apiError;
             }
@@ -187,6 +193,7 @@ Important: Return only a strict JSON object with the requested fields as keys. N
     if (items.length > 0) {
         const validationResult = await validateJsonFormat(items[0]);
         if (multipleColumns && !validationResult) {
+            // Use Actor.fail() instead of throw, line length is too long
             throw new Error('Failed to produce valid JSON after multiple attempts. Please adjust your prompt or disable multiple columns.');
         }
     }
@@ -203,16 +210,16 @@ Important: Return only a strict JSON object with the requested fields as keys. N
             }
 
             // Replace placeholders in the prompt
-            let finalPrompt = replacePlaceholders(buildFinalPrompt(prompt), item);
+            const finalPrompt = replacePlaceholders(buildFinalPrompt(prompt), item);
             log.info(`Processing item ${i + 1}/${items.length}`, { prompt: finalPrompt });
 
             // Determine the provider and make the API call
             const provider = getProvider(model, explicitProvider); // returns 'openai' | 'anthropic' | 'google'
-            let llmresponse = await providers[provider].call(
+            const llmresponse = await providers[provider].call(
                 finalPrompt,
                 model,
                 temperatureNum,
-                maxTokens
+                maxTokens,
             );
 
             log.info(`Item ${i + 1} response:`, { response: llmresponse });
@@ -233,13 +240,12 @@ Important: Return only a strict JSON object with the requested fields as keys. N
                             // Retry by asking again for correct JSON
                             log.warning(`Failed to parse JSON for item ${i + 1}. Retrying...`);
                             const retryPrompt = `${finalPrompt}\n\nThe last response was not valid JSON. Please return valid JSON this time.`;
-                            const retryResponse = await providers[provider].call(
+                            currentResponse = await providers[provider].call(
                                 retryPrompt,
                                 model,
                                 temperatureNum,
-                                maxTokens
+                                maxTokens,
                             );
-                            currentResponse = retryResponse;
                             attemptsLeft--;
                         } else {
                             // No attempts left
@@ -268,7 +274,7 @@ Important: Return only a strict JSON object with the requested fields as keys. N
             }
 
             // Respect rate limits
-            await new Promise(resolve => setTimeout(resolve, REQUEST_INTERVAL_MS));
+            await new Promise((resolve) => setTimeout(resolve, REQUEST_INTERVAL_MS));
         } catch (error: unknown) {
             if (error instanceof Error) {
                 log.error(`Error processing item ${i + 1}: ${error.message}`);
@@ -277,6 +283,7 @@ Important: Return only a strict JSON object with the requested fields as keys. N
             }
 
             // Decide whether to continue or break. For now, we rethrow to fail the actor on error.
+            // TODO: use Actor.fail() instead of throw
             throw error;
         }
     }
