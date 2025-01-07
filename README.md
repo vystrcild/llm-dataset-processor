@@ -32,15 +32,6 @@ You can use multiple placeholders in a single prompt.
 
 Placeholders are replaced with exact values from the input dataset for each item, so be careful when crafting your prompt.
 
-❌ **Bad practice:**
-```
-Take a look at all the values of the ${text} field in the dataset and do a sentiment analysis - write  \"positive\" \"negative\" or \"neutral\"
-```
-will resolve to:
-```
-Take a look at all the values of the Congratulations to your victory!!! 🥳 field in the dataset and do a sentiment analysis - write  "positive" "negative" or "neutral"
-```
-
 ✅ **Good practice:**
 ```
 Evaluate this post and label it as "positive", "negative" or "neutral". Don't explain anything and don't add any unnecessary text, generate only the label. 
@@ -52,10 +43,33 @@ Evaluate this post and label it as "positive", "negative" or "neutral". Don't ex
 Here's the post: Congratulations to your victory!!! 🥳
 ```
 
+❌ **Bad practice:**
+```
+Take a look at all the values of the ${text} field in the dataset and do a sentiment analysis - write  \"positive\" \"negative\" or \"neutral\"
+```
+will resolve to:
+```
+Take a look at all the values of the Congratulations to your victory!!! 🥳 field in the dataset and do a sentiment analysis - write  "positive" "negative" or "neutral"
+```
+
 ## 📊 Single column output
 A new dataset is created and the output is stored in a single column named `llmresponse`.
 
+Example of input dataset:
+
+| crawl    | markdown                              | metadata |
+| -------- | ------------------------------------- | -------- |
+| 5 fields | Congratulations to your victory!!! 🥳 | 4 fields |
+
+Example of output dataset:
+
+| crawl    | markdown                              | metadata | llmresponse |
+| -------- | ------------------------------------- | -------- | ----------- |
+| 5 fields | Congratulations to your victory!!! 🥳 | 4 fields | positive    |
+
+
 ### 😊 Sentiment Analysis
+Input prompt:
 ```
 Decide if this Instagram post is positive or negative:
 ${content.text}
@@ -64,8 +78,9 @@ Don't explain anything, just return words "positive" or "negative".
 ```
 
 ### 📝 Summarization
+Input prompt:
 ```
-Summarize provided text. Include also url, title and keywords at the end.
+Summarize provided text and also include url, title and keywords at the end.
 
 Text: ${text} 
 URL: ${url}
@@ -74,6 +89,7 @@ Keywords: ${metadata.keywords}
 ```
 
 ### 🌐 Translation
+Input prompt:
 ```
 Translate this text to English:
 ${text}
@@ -82,11 +98,25 @@ ${text}
 ## 📊 Using multi-column output
 A new dataset is created and the output is stored in multiple columns. To use this feature, make sure your prompt contains the names and descriptions of the desired output columns.
 
-Note that the column structure and names are created by the LLM based on the input prompt. We highly recommend testing your prompt first by enabling `Test Prompt Mode`. If the output structure does not match your expectations, please adjust your prompt to be more specific (using JSON structure or better column descriptions).
+Example of input dataset:
 
-The column structure is created with the first call and then validated for each item. If validation fails 3 times, the item in the dataset is skipped. If validation fails frequently, please adjust your prompt to be more specific.
+| crawl    | text                                                               | metadata |
+| -------- | ------------------------------------------------------------------ | -------- |
+| 5 fields | Contact Us We'd love to hear from you to see how Apify can help... | 4 fields |
+
+Example of output dataset:
+
+| crawl    | text                                                             | metadata | phone           | country_code | address                                                                                                  |
+| -------- | ---------------------------------------------------------------- | -------- | --------------- | ------------ | -------------------------------------------------------------------------------------------------------- |
+| 5 fields | Contact Us We'd love to hear from you to see how Apify can help... | 4 fields | No phone found. | CZE          | Apify Technologies s.r.o.  <br>**Lucerna Palace**  <br>Vodickova 704/36, 110 00 Prague 1, Czech Republic |
+
+
+Note that the column structure and names are created by the LLM based on the input prompt. We highly recommend testing your prompt first by enabling `Test Prompt Mode`. If the output structure does not match your expectations, prompt should be adjusted to be more specific (using JSON structure or better column descriptions).
+
+The column structure is created with the first call and then validated for each item. If validation fails three times, the item in the dataset is skipped. If this leads to a large number of skipped items, please adjust your prompt to be more specific.
 
 ### 📇 Extract contact information
+Input prompt:
 ```
 Extract contact information from provided text.
 
@@ -103,6 +133,7 @@ Here's input text: ${text}
 ```
 
 ### 📝 Extract key points from article
+Input prompt:
 ```
 Read provided text and create these:
 - summary: simple summary of the content in few sentences
@@ -118,7 +149,15 @@ If one or more fields are empty, the prompt is still sent to the LLM and could g
 ## 🤔 Which model to choose?
 For cost-effective processing, we recommend using `GPT-4o-mini` and `Claude 3.5 Haiku`. For higher quality results, we recommend using `GPT-4o` and `Claude 3.5 Sonnet`.
 
-Be aware that costs can grow very quickly with larger datasets. We recommend testing your prompt first by enabling `Test Prompt Mode`.
+Be aware that LLM costs can grow very quickly with larger datasets. We recommend testing your prompt first by enabling `Test Prompt Mode`.
+
+Example of processing and creating summaries of 100 blog articles with Claude 3.5. Sonnet:
+
+1.555.827 input tokens: $4.67
+44.926 output tokens: $0.67
+Apify Usage: $0.434
+
+**Total Costs**: $5.77
 
 Make sure you have sufficient credits in your LLM provider account.
 
