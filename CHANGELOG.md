@@ -1,2 +1,3 @@
-### 0.0.45 (2024-12-10)
-- First version
+### 0.0.21 (2025-01-07)
+- Updated readme
+- Minor fixes for better readability
