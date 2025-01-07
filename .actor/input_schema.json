@@ -1,6 +1,6 @@
 {
     "title": "LLM Dataset Processor",
-    "description": "Choose specific dataset to process, select LLM, provide API token and craft your prompt template. We recommend to test your prompt first by enabling `Test Prompt Mode`. ",
+    "description": "Choose specific dataset to process, select LLM, provide API token and craft your prompt template. We recommend testing your prompt first by enabling `Test Prompt Mode`. ",
     "type": "object",
     "schemaVersion": 1,
     "required": [
@@ -25,11 +25,11 @@
             "enumTitles": ["GPT-4o mini (Recommended)", "GPT-4o", "Claude 3.5 Haiku (Recommended)", "Claude 3.5 Sonnet", "Claude 3 Opus", "Gemini 1.5 Flash", "Gemini 1.5 Flash-8B (Recommended)" ,"Gemini 1.5 Pro"],
             "enum": ["gpt-4o-mini", "gpt-4o", "claude-3-5-haiku-latest", "claude-3-5-sonnet-latest", "claude-3-opus-latest", "gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-1.5-pro"]
         },
-        "llmApiToken": {
+        "llmProviderApiKey": {
             "type": "string",
-            "title": "LLM Provider API Token",
+            "title": "LLM Provider API Key",
             "editor": "textfield",
-            "description": "Your API token for the LLM Provider (e.g., OpenAI).",
+            "description": "Your API key for the LLM Provider (e.g., OpenAI).",
             "isSecret": true
         },
         "temperature": {
@@ -37,7 +37,7 @@
             "type": "string",
             "title": "Temperature",
             "editor": "textfield",
-            "description": "Sampling temperature for the LLM API (controls randomness). We recommend to use a value closer to 0 for exact results. In case of more 'creative' results, we recommend to use a value closer to 1.",
+            "description": "Sampling temperature for the LLM API (controls randomness). We recommend using a value closer to 0 for exact results. In case of more 'creative' results, we recommend to use a value closer to 1.",
             "default": "0.1"
         },
         "multipleColumns": {
@@ -64,8 +64,8 @@
             "type": "integer",
             "title": "Max Tokens",
             "editor": "number",
-            "description": "Maximum number of tokens in the LLM API response.",
-            "default": 150
+            "description": "Maximum number of tokens in the LLM API response for each item.",
+            "default": 300
         },
         "testPrompt": {
             "type": "boolean",

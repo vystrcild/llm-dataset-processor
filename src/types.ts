@@ -1,7 +1,7 @@
 export interface Input {
     inputDatasetId: string;
     defaultDatasetId: string;
-    llmApiToken: string;
+    llmProviderApiKey: string;
     prompt: string;
     model: string;
     temperature: string;
