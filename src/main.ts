@@ -143,7 +143,7 @@ async function processItems(
                 continue;
             }
 
-            let finalPrompt = replacePlaceholders(buildFinalPrompt(config.prompt, config.multipleColumns), item);
+            const finalPrompt = replacePlaceholders(buildFinalPrompt(config.prompt, config.multipleColumns), item);
             log.info(`Processing item ${i + 1}/${items.length}`, { prompt: finalPrompt });
 
             const provider = getProvider(config.model);
@@ -151,7 +151,7 @@ async function processItems(
                 finalPrompt,
                 config.model,
                 temperatureNum,
-                config.maxTokens
+                config.maxTokens,
             );
 
             log.info(`Item ${i + 1} response:`, { response: llmresponse });
