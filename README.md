@@ -1,5 +1,5 @@
 ## 💡 What is LLM Dataset Processor?
-LLM Dataset Processor is an [Apify Actor](https://docs.apify.com/platform/actors) that allows you to process a **output of other Actors or standalone dataset with a single LLM prompt**. It's useful when you need to enrich data, summarize content, extract specific information, or manipulate data in a structured way using AI.
+LLM Dataset Processor is an [Apify Actor](https://docs.apify.com/platform/actors) that allows you to process a **output of other Actors or stored dataset with a single LLM prompt**. It's useful when you need to enrich data, summarize content, extract specific information, or manipulate data in a structured way using AI.
 
 Choose a specific dataset to process, select an LLM, provide an API token, and craft your prompt template. You can output responses as a single column or in a JSON-structured multi-column format.
 
