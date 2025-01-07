@@ -35,7 +35,7 @@ async function run(): Promise<void> {
         const inputDatasetId = input?.inputDatasetId || input?.payload?.resource?.defaultDatasetId;
 
         if (!inputDatasetId) {
-            await Actor.fail('No inputDatasetId provided.');
+            await Actor.fail('No inputDatasetId provided. Please provide the necessary input parameters.');
             return;
         }
 
