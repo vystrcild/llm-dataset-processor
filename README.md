@@ -55,13 +55,13 @@ Take a look at all the values of the Congratulations to your victory!!! 🥳 fie
 ## 📊 Single column output
 A new dataset is created and the output is stored in a single column named `llmresponse`.
 
-Example of input dataset:
+Example of *input* dataset:
 
 | crawl    | markdown                              | metadata |
 | -------- | ------------------------------------- | -------- |
 | 5 fields | Congratulations to your victory!!! 🥳 | 4 fields |
 
-Example of output dataset:
+Example of *output* dataset:
 
 | crawl    | markdown                              | metadata | llmresponse |
 | -------- | ------------------------------------- | -------- | ----------- |
@@ -98,13 +98,13 @@ ${text}
 ## 📊 Using multi-column output
 A new dataset is created and the output is stored in multiple columns. To use this feature, make sure your prompt contains the names and descriptions of the desired output columns.
 
-Example of input dataset:
+Example of *input* dataset:
 
 | crawl    | text                                                               | metadata |
 | -------- | ------------------------------------------------------------------ | -------- |
 | 5 fields | Contact Us We'd love to hear from you to see how Apify can help... | 4 fields |
 
-Example of output dataset:
+Example of *output* dataset:
 
 | crawl    | text                                                             | metadata | phone           | country_code | address                                                                                                  |
 | -------- | ---------------------------------------------------------------- | -------- | --------------- | ------------ | -------------------------------------------------------------------------------------------------------- |
@@ -153,10 +153,9 @@ Be aware that LLM costs can grow very quickly with larger datasets. We recommend
 
 Example of processing and creating summaries of 100 blog articles with Claude 3.5. Sonnet:
 
-1.555.827 input tokens: $4.67
-44.926 output tokens: $0.67
-Apify Usage: $0.434
-
+- 1.555.827 input tokens: $4.67
+- 1.44.926 output tokens: $0.67
+- Apify Usage: $0.434
 **Total Costs**: $5.77
 
 Make sure you have sufficient credits in your LLM provider account.
