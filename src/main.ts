@@ -353,6 +353,7 @@ async function run(): Promise<void> {
         });
 
         log.info('Actor finished successfully');
+        await Actor.exit();
     } catch (error) {
         if (error instanceof Error) {
             log.error('Actor failed:', { error: error.message });
