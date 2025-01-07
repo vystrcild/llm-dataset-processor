@@ -28,7 +28,6 @@ async function run(): Promise<void> {
             maxTokens,
             skipItemIfEmpty,
             multipleColumns = false,
-            provider: explicitProvider,
             testPrompt = false,
             testItemsCount = 3,
         } = input;
@@ -139,7 +138,7 @@ Important: Return only a strict JSON object with the requested fields as keys. N
         async function validateJsonFormat(testItem: OutputItem): Promise<boolean> {
             if (!multipleColumns) return true; // No need to validate if single column.
 
-            const provider = getProvider(model, explicitProvider);
+            const provider = getProvider(model);
             let finalPrompt = replacePlaceholders(buildFinalPrompt(prompt), testItem);
 
             for (let attempt = 1; attempt <= 3; attempt++) {
@@ -215,7 +214,7 @@ Important: Return only a strict JSON object with the requested fields as keys. N
                 log.info(`Processing item ${i + 1}/${items.length}`, { prompt: finalPrompt });
 
                 // Determine the provider and make the API call
-                const provider = getProvider(model, explicitProvider); // returns 'openai' | 'anthropic' | 'google'
+                const provider = getProvider(model); // returns 'openai' | 'anthropic' | 'google'
                 let llmresponse = await providers[provider].call(
                     finalPrompt,
                     model,
