@@ -86,7 +86,7 @@
             "editor": "javascript",
             "prefill": "(item) => {\n    return item;\n}",
             "sectionCaption": "Transforming functions",
-            "sectionDescription": "Optionally transform the data. The function is called for each item."
+            "sectionDescription": "Optionally transform the data. The function is called for each item. This is needed to use for fields that are array.\n\nExample:\n```js\n(item) => {\n    item.joinedReviewsTexts = item.reviews.reduce((joinedText, review) => {\n        return joinedText + '\\n' + review.text;\n    })\n    return item;\n}\n```\n\nThen, you can use `${joinedReviewsTexts}` in your prompt."
         }
     }
 }
