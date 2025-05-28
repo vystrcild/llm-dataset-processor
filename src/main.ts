@@ -27,7 +27,7 @@ function isEmpty(value: any): boolean {
 // Helper function to check if any placeholder field is empty
 function hasEmptyFields(promptStr: string, item: OutputItem): boolean {
     const fieldMatches = promptStr.match(/\$\{([^}]+)\}/g) || [];
-    return fieldMatches.some(match => {
+    return fieldMatches.some((match) => {
         const field = match.slice(2, -1).trim(); // Remove ${ and }
         const value = getNestedValue(item, field);
         return isEmpty(value);
@@ -100,14 +100,14 @@ async function fetchDatasetItems(inputDatasetId: string, testPrompt: boolean, te
 
         const inputDataset = await Actor.openDataset<OutputItem>(inputDatasetId);
         const { items: fetchedItems } = await inputDataset.getData();
-        
+
         if (testPrompt) {
             const itemCount = Math.min(testItemsCount, fetchedItems.length);
             const items = fetchedItems.slice(0, itemCount);
             log.info(`Test mode enabled - processing ${itemCount} items out of ${fetchedItems.length}`);
             return items;
         }
-        
+
         log.info(`Fetched ${fetchedItems.length} items from the input dataset.`);
         return fetchedItems;
     } catch (error) {
@@ -130,7 +130,7 @@ async function processItems(
         maxTokens: number;
         skipItemIfEmpty: boolean;
         multipleColumns: boolean;
-    }
+    },
 ): Promise<void> {
     const temperatureNum = parseFloat(config.temperature);
 
@@ -147,7 +147,7 @@ async function processItems(
             log.info(`Processing item ${i + 1}/${items.length}`, { prompt: finalPrompt });
 
             const provider = getProvider(config.model);
-            let llmresponse = await providers[provider].call(
+            const llmresponse = await providers[provider].call(
                 finalPrompt,
                 config.model,
                 temperatureNum,
@@ -165,7 +165,7 @@ async function processItems(
                 finalPrompt,
             });
 
-            await new Promise(resolve => setTimeout(resolve, REQUEST_INTERVAL_MS));
+            await new Promise((resolve) => setTimeout(resolve, REQUEST_INTERVAL_MS));
         } catch (error) {
             if (error instanceof Error) {
                 log.error(`Error processing item ${i + 1}: ${error.message}`);
@@ -188,7 +188,7 @@ async function handleItemResponse(
         maxTokens: number;
         providers: Record<string, OpenAIProvider | AnthropicProvider | GoogleProvider>;
         finalPrompt: string;
-    }
+    },
 ): Promise<void> {
     if (multipleColumns) {
         let parsedData: any;
@@ -209,7 +209,7 @@ async function handleItemResponse(
                         retryPrompt,
                         config.model,
                         config.temperature,
-                        config.maxTokens
+                        config.maxTokens,
                     );
                     attemptsLeft--;
                 } else {
@@ -261,9 +261,9 @@ async function validateJsonFormat(testItem: OutputItem, config: {
                 finalPrompt,
                 config.model,
                 parseFloat(config.temperature),
-                config.maxTokens
+                config.maxTokens,
             );
-            
+
             // First check if we got an empty response
             if (!testResponse) {
                 log.error('Empty response received from the API');
@@ -290,13 +290,13 @@ async function validateJsonFormat(testItem: OutputItem, config: {
             }
         } catch (apiError: any) {
             // Log the full error for debugging
-            log.error('API call failed:', { 
+            log.error('API call failed:', {
                 error: apiError.message,
                 type: apiError.type,
                 code: apiError.code,
-                param: apiError.param
+                param: apiError.param,
             });
-            
+
             // Rethrow API errors immediately instead of retrying
             throw apiError;
         }
@@ -320,7 +320,7 @@ async function run(): Promise<void> {
         const items = await fetchDatasetItems(
             validatedInput.inputDatasetId,
             validatedInput.testPrompt,
-            validatedInput.testItemsCount
+            validatedInput.testItemsCount,
         );
 
         const providers = {
@@ -337,7 +337,7 @@ async function run(): Promise<void> {
                 maxTokens: validatedInput.maxTokens,
                 prompt: validatedInput.prompt,
             });
-            
+
             if (!validationResult) {
                 throw new Error('Failed to produce valid JSON after multiple attempts. Please adjust your prompt or disable multiple columns.');
             }

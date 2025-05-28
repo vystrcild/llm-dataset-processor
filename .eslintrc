@@ -12,6 +12,9 @@
         "project": "./tsconfig.json",
         "ecmaVersion": 2020
     },
+    "rules": {
+        "@typescript-eslint/no-explicit-any": "off"
+    },
     "ignorePatterns": [
         "node_modules",
         "dist",
