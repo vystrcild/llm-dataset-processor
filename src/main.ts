@@ -2,7 +2,8 @@
 
 import { Actor, log } from 'apify';
 import { OpenAIProvider, AnthropicProvider, GoogleProvider, getProvider } from './providers/index.js';
-import { Input, OutputItem } from './types.js';
+import { Input, OutputItem, ValidatedInput } from './types.js';
+import { parseCustomPreprocessingFunction } from './utils.js';
 
 // Rate limits for OpenAI API lowest tier
 const RATE_LIMIT_PER_MINUTE = 500;
@@ -25,9 +26,9 @@ function isEmpty(value: any): boolean {
 }
 
 // Helper function to check if any placeholder field is empty
-function hasEmptyFields(promptStr: string, item: OutputItem): boolean {
+function hasEmptyFields(promptStr: string, item: any): boolean {
     const fieldMatches = promptStr.match(/\$\{([^}]+)\}/g) || [];
-    return fieldMatches.some(match => {
+    return fieldMatches.some((match) => {
         const field = match.slice(2, -1).trim(); // Remove ${ and }
         const value = getNestedValue(item, field);
         return isEmpty(value);
@@ -35,25 +36,14 @@ function hasEmptyFields(promptStr: string, item: OutputItem): boolean {
 }
 
 // Helper function to replace field placeholders in prompt with actual values
-function replacePlaceholders(promptStr: string, item: OutputItem): string {
+function replacePlaceholders(promptStr: string, item: any): string {
     return promptStr.replace(/\$\{([^}]+)\}/g, (_match, fieldName: string) => {
         const value = getNestedValue(item, fieldName.trim());
         return value !== undefined ? String(value) : '';
     });
 }
 
-async function validateInput(): Promise<{
-    inputDatasetId: string;
-    llmProviderApiKey: string;
-    prompt: string;
-    model: string;
-    temperature: string;
-    maxTokens: number;
-    skipItemIfEmpty: boolean;
-    multipleColumns: boolean;
-    testPrompt: boolean;
-    testItemsCount: number;
-}> {
+async function validateInput(): Promise<ValidatedInput> {
     const input = await Actor.getInput() as Input;
     if (!input) {
         throw new Error('No input provided. Please provide the necessary input parameters.');
@@ -77,6 +67,8 @@ async function validateInput(): Promise<{
         throw new Error('No inputDatasetId provided. Please provide the necessary input parameters.');
     }
 
+    const preprocessingFunction = parseCustomPreprocessingFunction(input.preprocessingFunction);
+
     return {
         inputDatasetId,
         llmProviderApiKey,
@@ -88,6 +80,7 @@ async function validateInput(): Promise<{
         multipleColumns,
         testPrompt,
         testItemsCount,
+        preprocessingFunction,
     };
 }
 
@@ -98,16 +91,16 @@ async function fetchDatasetItems(inputDatasetId: string, testPrompt: boolean, te
             throw new Error(`Dataset with ID ${inputDatasetId} does not exist`);
         }
 
-        const inputDataset = await Actor.openDataset<OutputItem>(inputDatasetId);
+        const inputDataset = await Actor.openDataset<OutputItem>(inputDatasetId, { forceCloud: true });
         const { items: fetchedItems } = await inputDataset.getData();
-        
+
         if (testPrompt) {
             const itemCount = Math.min(testItemsCount, fetchedItems.length);
             const items = fetchedItems.slice(0, itemCount);
             log.info(`Test mode enabled - processing ${itemCount} items out of ${fetchedItems.length}`);
             return items;
         }
-        
+
         log.info(`Fetched ${fetchedItems.length} items from the input dataset.`);
         return fetchedItems;
     } catch (error) {
@@ -123,19 +116,13 @@ async function fetchDatasetItems(inputDatasetId: string, testPrompt: boolean, te
 async function processItems(
     items: OutputItem[],
     providers: Record<string, OpenAIProvider | AnthropicProvider | GoogleProvider>,
-    config: {
-        prompt: string;
-        model: string;
-        temperature: string;
-        maxTokens: number;
-        skipItemIfEmpty: boolean;
-        multipleColumns: boolean;
-    }
+    config: ValidatedInput,
 ): Promise<void> {
     const temperatureNum = parseFloat(config.temperature);
+    const { preprocessingFunction } = config;
 
     for (let i = 0; i < items.length; i++) {
-        const item = items[i];
+        const item = preprocessingFunction(items[i]);
 
         try {
             if (config.skipItemIfEmpty && hasEmptyFields(config.prompt, item)) {
@@ -147,7 +134,7 @@ async function processItems(
             log.info(`Processing item ${i + 1}/${items.length}`, { prompt: finalPrompt });
 
             const provider = getProvider(config.model);
-            let llmresponse = await providers[provider].call(
+            const llmresponse = await providers[provider].call(
                 finalPrompt,
                 config.model,
                 temperatureNum,
@@ -165,7 +152,7 @@ async function processItems(
                 finalPrompt,
             });
 
-            await new Promise(resolve => setTimeout(resolve, REQUEST_INTERVAL_MS));
+            await new Promise((resolve) => setTimeout(resolve, REQUEST_INTERVAL_MS));
         } catch (error) {
             if (error instanceof Error) {
                 log.error(`Error processing item ${i + 1}: ${error.message}`);
@@ -178,7 +165,7 @@ async function processItems(
 }
 
 async function handleItemResponse(
-    item: OutputItem,
+    item: any,
     llmresponse: string,
     multipleColumns: boolean,
     config: {
@@ -188,7 +175,7 @@ async function handleItemResponse(
         maxTokens: number;
         providers: Record<string, OpenAIProvider | AnthropicProvider | GoogleProvider>;
         finalPrompt: string;
-    }
+    },
 ): Promise<void> {
     if (multipleColumns) {
         let parsedData: any;
@@ -209,7 +196,7 @@ async function handleItemResponse(
                         retryPrompt,
                         config.model,
                         config.temperature,
-                        config.maxTokens
+                        config.maxTokens,
                     );
                     attemptsLeft--;
                 } else {
@@ -245,7 +232,7 @@ function buildFinalPrompt(promptText: string, multipleColumns: boolean): string 
 Important: Return only a strict JSON object with the requested fields as keys. No extra text or explanations, no markdown, just JSON.`;
 }
 
-async function validateJsonFormat(testItem: OutputItem, config: {
+async function validateJsonFormat(testItem: any, config: {
     providers: Record<string, OpenAIProvider | AnthropicProvider | GoogleProvider>;
     model: string;
     temperature: string;
@@ -261,9 +248,9 @@ async function validateJsonFormat(testItem: OutputItem, config: {
                 finalPrompt,
                 config.model,
                 parseFloat(config.temperature),
-                config.maxTokens
+                config.maxTokens,
             );
-            
+
             // First check if we got an empty response
             if (!testResponse) {
                 log.error('Empty response received from the API');
@@ -290,13 +277,13 @@ async function validateJsonFormat(testItem: OutputItem, config: {
             }
         } catch (apiError: any) {
             // Log the full error for debugging
-            log.error('API call failed:', { 
+            log.error('API call failed:', {
                 error: apiError.message,
                 type: apiError.type,
                 code: apiError.code,
-                param: apiError.param
+                param: apiError.param,
             });
-            
+
             // Rethrow API errors immediately instead of retrying
             throw apiError;
         }
@@ -320,7 +307,7 @@ async function run(): Promise<void> {
         const items = await fetchDatasetItems(
             validatedInput.inputDatasetId,
             validatedInput.testPrompt,
-            validatedInput.testItemsCount
+            validatedInput.testItemsCount,
         );
 
         const providers = {
@@ -330,27 +317,21 @@ async function run(): Promise<void> {
         };
 
         if (items.length > 0 && validatedInput.multipleColumns) {
-            const validationResult = await validateJsonFormat(items[0], {
+            const firstItem = validatedInput.preprocessingFunction(items[0]);
+            const validationResult = await validateJsonFormat(firstItem, {
                 providers,
                 model: validatedInput.model,
                 temperature: validatedInput.temperature,
                 maxTokens: validatedInput.maxTokens,
                 prompt: validatedInput.prompt,
             });
-            
+
             if (!validationResult) {
                 throw new Error('Failed to produce valid JSON after multiple attempts. Please adjust your prompt or disable multiple columns.');
             }
         }
 
-        await processItems(items, providers, {
-            prompt: validatedInput.prompt,
-            model: validatedInput.model,
-            temperature: validatedInput.temperature,
-            maxTokens: validatedInput.maxTokens,
-            skipItemIfEmpty: validatedInput.skipItemIfEmpty,
-            multipleColumns: validatedInput.multipleColumns,
-        });
+        await processItems(items, providers, validatedInput);
 
         log.info('Actor finished successfully');
         await Actor.exit();

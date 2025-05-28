@@ -15,12 +15,12 @@ export class AnthropicProvider implements LLMProvider {
             temperature,
             messages: [{ role: 'user', content: promptText }],
         });
-        
+
         if (!message.content || message.content.length === 0) {
             return '';
         }
 
-        const textContent = message.content.find(c => c.type === 'text');
+        const textContent = message.content.find((c) => c.type === 'text');
         return textContent?.text || '';
     }
 }

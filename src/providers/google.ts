@@ -10,7 +10,7 @@ export class GoogleProvider implements LLMProvider {
 
     async call(promptText: string, model: string, temperature: number, maxTokens: number): Promise<string> {
         const genModel = this.client.getGenerativeModel({ model });
-        
+
         const result = await genModel.generateContent({
             contents: [{ role: 'user', parts: [{ text: promptText }] }],
             generationConfig: {
@@ -19,7 +19,7 @@ export class GoogleProvider implements LLMProvider {
             },
         });
 
-        const response = result.response;
+        const { response } = result;
         return response.text();
     }
 }

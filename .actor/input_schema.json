@@ -33,7 +33,6 @@
             "isSecret": true
         },
         "temperature": {
-            
             "type": "string",
             "title": "Temperature",
             "editor": "textfield",
@@ -45,7 +44,7 @@
             "title": "Multiple columns in output",
             "description": "When enabled, instructs the LLM to return responses as JSON objects, creating multiple columns in the output dataset. The columns need to be named and described in the prompt. If disabled, responses are stored in a single `llmresponse` column.",
             "default": false
-            },
+        },
         "prompt": {
             "type": "string",
             "title": "Prompt Template",
@@ -79,6 +78,15 @@
             "description": "Number of items to process when `Test Prompt Mode` is enabled.",
             "default": 3,
             "minimum": 1
+        },
+        "preprocessingFunction": {
+            "title": "Preprocessing function",
+            "type": "string",
+            "description": "Function to transform item before they are put into the promp.",
+            "editor": "javascript",
+            "prefill": "(item) => {\n    return item;\n}",
+            "sectionCaption": "Transforming functions",
+            "sectionDescription": "Optionally transform the data. The function is called for each item."
         }
     }
 }
