@@ -78,6 +78,15 @@
             "description": "Number of items to process when `Test Prompt Mode` is enabled.",
             "default": 3,
             "minimum": 1
+        },
+        "preprocessingFunction": {
+            "title": "Preprocessing function",
+            "type": "string",
+            "description": "Function to transform item before they are put into the promp.",
+            "editor": "javascript",
+            "prefill": "(item) => {\n    return item;\n}",
+            "sectionCaption": "Transforming functions",
+            "sectionDescription": "Optionally transform the data. The function is called for each item."
         }
     }
 }
